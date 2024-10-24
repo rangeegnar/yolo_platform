@@ -1,0 +1,27 @@
+<ul class="nav navbar-nav active">
+    <li class="dropdown ">
+        <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+           aria-expanded="false"> 项 目
+            {% if request.tracer.project.name %}
+                ({{ request.tracer.project.name }})
+            {% endif %}
+            <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            {% if my %}
+                <div><i class="fa fa-list" aria-hidden="true"></i> 我创建的项目</div>
+                {% for item in my %}
+                    <li><a href="{% url 'manage:dashboard' project_id=item.id %}">{{ item.name }}</a></li>
+                {% endfor %}
+            {% endif %}
+            {% if join %}
+                <li role="separator" class="divider"></li>
+                <div><i class="fa fa-handshake-o" aria-hidden="true"></i> 我参与的项目</div>
+                {% for item in join %}
+                    <li><a href="{% url 'manage:dashboard' project_id=item.project.id %}">{{ item.project.name }}</a></li>
+                {% endfor %}
+            {% endif %}
+            <li role="separator" class="divider"></li>
+            <li><a href="#">所有项目</a></li>
+        </ul>
+    </li>
+</ul>

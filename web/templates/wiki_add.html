@@ -1,0 +1,131 @@
+{% extends 'layout/manage.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/editor-md/css/editormd.min.css' %}">
+    <style>
+        .panel-default {
+            margin-top: 10px;
+        }
+
+        .panel-default .panel-heading {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .panel-body {
+            padding: 0;
+        }
+
+        .title-list {
+            border-right: 1px solid #dddddd;
+            min-height: 500px;
+        }
+
+        .content {
+            border-left: 1px solid #dddddd;
+            min-height: 600px;
+            margin-left: -1px;
+        }
+
+        .error-msg {
+            color: red;
+            position: absolute;
+            font-size: 13px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div>
+                    <i class="fa fa-book" aria-hidden="true"></i> wiki文档
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-3 title-list">
+                    <div>目录</div>
+                    <ul id="catalog">
+
+                    </ul>
+                </div>
+                <div class="col-sm-9 content">
+                    <form method="post" action="{% url 'manage:wiki_add' project_id=request.tracer.project.id %} " novalidate>
+                        {% csrf_token %}
+                        {% for field in form %}
+                            {% if field.name == 'content' %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    <div id="editor">
+                                        {{ field }}
+                                    </div>
+                                    <span class="error-msg">{{ field.errors.0 }}</span>
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    <span class="error-msg">{{ field.errors.0 }}</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <button type="submit" class="btn btn-primary">提 交</button>
+                    </form>
+                </div>
+                <div></div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'plugins/editor-md/editormd.min.js' %}"></script>
+    <script>
+
+        var WIKI_DETAIL_URL = "{% url 'manage:wiki' project_id=request.tracer.project.id %}"
+        $(function () {
+            initCatlog();
+            initEdtorMd();
+        })
+
+        function initCatlog() {
+            $.ajax({
+                url: '{% url 'manage:wiki_catalog' project_id=request.tracer.project.id %}',
+                type: 'GET',
+                datatype: 'JSON',
+                success: function (res) {
+                    if (res.status) {
+                        console.log(res)
+                        $.each(res.data, function (index, item) {
+                            // if value_list : item = [1, '不动产预告登记', null]
+                            // if value : item = {id: 1, title: '不动产预告登记', parent_id: null}
+                            var href = WIKI_DETAIL_URL + "?wiki_id=" + item.id
+                            var li = $('<li>').attr('id', 'id_' + item.id).append($('<a>').text(item.title).attr('href', href)).append($('<ul>'));
+                            if (!item.parent_id) {
+                                // <ul id="catalog">   </ul>
+                                $('#catalog').append(li);
+                            } else {
+                                $('#id_' + item.parent_id).children('ul').append(li);
+                            }
+                        })
+                    }
+                }
+            })
+        }
+
+        function initEdtorMd() {
+            editormd('editor', {
+                placeholder: '请输入内容',
+                height: 500,
+                path: '{% static 'plugins/editor-md/lib/' %}'
+            })
+        }
+    </script>
+{% endblock %}
