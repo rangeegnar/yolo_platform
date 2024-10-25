@@ -67,7 +67,7 @@ def login_sms(request):
         user_object = models.UserInfo.objects.filter(mobile_phone=mobile_phone).first()
         request.session['user_id'] = user_object.id
         request.session['user_name'] = user_object.username
-        request.session.set_expiry(60 * 60)
+        request.session.set_expiry(60 * 60 * 24 * 14)
 
         return JsonResponse({"status": True, "data": "/index/"})
 
@@ -92,7 +92,7 @@ def login(request):
         else:
             request.session['user_id'] = user_object.id
             request.session['user_name'] = user_object.username
-            request.session.set_expiry(60 * 60)
+            request.session.set_expiry(60 * 60 * 24 * 14)
             return JsonResponse({"status": True, "data": "/index/"})
 
     return JsonResponse({"status": False, "error": form.errors})

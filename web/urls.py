@@ -1,5 +1,7 @@
 from django.urls import path, include
 from web.views import account, home, project, wiki, dashboard, issue, statistics, file, setting
+from django.conf.urls.static import static
+from tracer import settings
 
 urlpatterns = [
     # 用户相关的 URL
@@ -24,6 +26,7 @@ urlpatterns = [
         path('statistics/', statistics.statistics, name='statistics'),
 
         path('file/', file.file, name='file'),
+        path('file/delete/<int:file_id>/', file.file_delete, name='file_delete'),
 
         # Wiki 相关的 URL
         path('wiki/', wiki.wiki, name='wiki'),
@@ -34,4 +37,4 @@ urlpatterns = [
 
         path('settings/', setting.settings, name='settings'),
     ], 'manage'), namespace='manage')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # 添加媒体文件支持

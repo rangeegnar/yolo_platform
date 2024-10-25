@@ -108,3 +108,13 @@ class Wiki(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class FileInfo(models.Model):
+    name = models.CharField(verbose_name='文件名称', max_length=255)  # 文件名称
+    file_size = models.PositiveIntegerField(verbose_name='文件大小')  # 文件大小（以字节为单位）
+    updated_by = models.ForeignKey(UserInfo, on_delete=models.SET_NULL, null=True)  # 更新者
+    updated_at = models.DateTimeField(verbose_name='更新时间')
+
+    def __str__(self):
+        return self.name

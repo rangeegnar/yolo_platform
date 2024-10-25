@@ -52,8 +52,17 @@ MIDDLEWARE = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
 ROOT_URLCONF = 'tracer.urls'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# 媒体文件的设置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 上传文件存放的目录
+
+DATA_UPLOAD_MAX_NUMBER_FILES = 1000
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -142,6 +151,8 @@ WHITE_REGEX_URL_LIST = [
     "/send/sms/",
     "/lgout/",
 ]
+
+
 
 
 try:
