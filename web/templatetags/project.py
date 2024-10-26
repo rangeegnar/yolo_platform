@@ -17,11 +17,12 @@ def all_project_list(request):
 def manage_menu_list(request):
     data_list = [
         {'title': '概览', 'url': reverse('manage:dashboard', kwargs={'project_id': request.tracer.project.id})},
-        {'title': '问题', 'url': reverse('manage:issue', kwargs={'project_id': request.tracer.project.id})},
+        {'title': '文件', 'url': reverse('manage:file', kwargs={'project_id': request.tracer.project.id})},
+        {'title': '检测', 'url': reverse('manage:detect', kwargs={'project_id': request.tracer.project.id})},
+        {'title': '配置', 'url': reverse('manage:settings', kwargs={'project_id': request.tracer.project.id})},
         {'title': '统计', 'url': reverse('manage:statistics', kwargs={'project_id': request.tracer.project.id})},
         {'title': 'wiki', 'url': reverse('manage:wiki', kwargs={'project_id': request.tracer.project.id})},
-        {'title': '文件', 'url': reverse('manage:file', kwargs={'project_id': request.tracer.project.id})},
-        {'title': '配置', 'url': reverse('manage:settings', kwargs={'project_id': request.tracer.project.id})},
+
     ]
     for item in data_list:
         if request.path_info.startswith(item['url']):

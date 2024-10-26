@@ -1,7 +1,6 @@
 {% extends 'layout/manage.html' %}
 
-
-{% block title %}file{% endblock %}
+{% block title %}文件上传{% endblock %}
 {% block css %}
     <style>
         .panel-default .panel-heading {
@@ -45,13 +44,9 @@
     </style>
 {% endblock %}
 
-
 {% block content %}
-
     <div class="container-fluid">
-
         <div class="panel panel-default" style="margin-top: 20px;">
-            <!-- Default panel contents -->
             <div class="panel-heading">
                 <div>
                     <a href="{% url 'manage:file' project_id=request.tracer.project.id %}">
@@ -61,15 +56,15 @@
                 </div>
                 <div class="function">
                     <div class="btn btn-primary btn-xs upload" style="position: relative">
-                        <div><i class="fa fa-upload" aria-hidden="true"></i> 上传文件或文件夹</div>
-                        <input type="file" multiple name="uploadFile" id="uploadFile" webkitdirectory>
+                        <div><i class="fa fa-upload" aria-hidden="true"></i> 上传文件夹</div>
+                        <input type="file" multiple name="uploadFolder" id="uploadFolder" webkitdirectory>
                     </div>
-                    <a class="btn btn-success btn-xs" data-toggle="modal" data-target="#addModal" data-whatever="新建文件夹">
-                        <i class="fa fa-plus-circle" aria-hidden="true"></i> 新建文件夹
-                    </a>
+                    <div class="btn btn-primary btn-xs upload" style="position: relative">
+                        <div><i class="fa fa-upload" aria-hidden="true"></i> 上传文件</div>
+                        <input type="file" multiple name="uploadFile" id="uploadFile">
+                    </div>
                 </div>
             </div>
-            <!-- Table -->
             <table class="table">
                 <thead>
                 <tr>
@@ -84,33 +79,40 @@
                 <tr>
                     {% for item in queryset %}
                         <tr>
-                            <td>{{ item.name }}</td>
+                            <td>
+                                {% if item.file_type == 1 %}
+                                    <a id="show_folder_detail" href="{% url 'manage:file_detail' project_id=request.tracer.project.id file_id=item.id %}">{{ item.name }}</a>
+                                {% else %}
+                                    {{ item.name }}
+                                {% endif %}
+                            </td>
                             <td>{{ item.file_size }}</td>
                             <td>{{ item.updated_by }}</td>
                             <td>{{ item.updated_at }}</td>
                             <td>
-                                <a type="button" class="btn btn-danger btn-xs"
-                                   href="{% url 'manage:file_delete' project_id=request.tracer.project.id file_id=item.id%}">
-                                    <i class="fa fa-plus-circle" aria-hidden="true"></i> 删除
+                                <a type="button" class="btn btn-success btn-xs"
+                                   href="{% url 'manage:file_edit' project_id=request.tracer.project.id file_id=item.id %}">
+                                    <i class="fa fa-edit" aria-hidden="true"></i> 编辑
                                 </a>
-
+                                <a type="button" class="btn btn-danger btn-xs"
+                                   href="{% url 'manage:file_delete' project_id=request.tracer.project.id file_id=item.id %}">
+                                    <i class="fa fa-trash" aria-hidden="true"></i> 删除
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tr>
-
                 </tbody>
             </table>
         </div>
-
     </div>
 {% endblock %}
-
 
 {% block js %}
     <script>
         $(document).ready(function () {
-            $('#uploadFile').on('change', function (event) {
+            // 处理文件夹上传
+            $('#uploadFolder').on('change', function (event) {
                 const files = event.target.files;  // 获取选中的文件
                 const formData = new FormData();   // 创建 FormData 对象
 
@@ -118,30 +120,71 @@
                 for (let i = 0; i < files.length; i++) {
                     formData.append('uploadFile', files[i]);
                 }
+
                 // 获取 CSRF 令牌
                 const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                const URL_FILE = "{% url 'manage:file' project_id=request.tracer.project.id %}";
 
                 // 使用 AJAX 发送文件到服务器
                 $.ajax({
-                    url: '{% url 'manage:file' project_id=request.tracer.project.id %}',  // 上传处理的 URL
+                    url: URL_FILE,
                     type: 'POST',
                     data: formData,
-                    processData: false,  // 不处理数据
-                    contentType: false,   // 不设置内容类型
+                    processData: false,
+                    contentType: false,
                     headers: {
-                        'X-CSRFToken': csrfToken  // 添加 CSRF 令牌
+                        'X-CSRFToken': csrfToken
                     },
                     success: function (data) {
-                        console.log('Success:', data);    // 处理成功响应
-                        alert('文件上传成功！');
-
+                        console.log('Success:', data);
+                        alert('文件夹上传成功！');
+                        window.location.href = URL_FILE;
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        console.error('Error:', textStatus, errorThrown);  // 处理错误
+                        console.error('Error:', textStatus, errorThrown);
+                        alert('文件夹上传失败！');
+                        window.location.href = URL_FILE;
+                    }
+                });
+            });
+
+            // 处理单个文件上传
+            $('#uploadFile').on('change', function (event) {
+                const files = event.target.files;  // 获取选中的文件
+                const formData = new FormData();   // 创建 FormData 对象
+
+                // 将所有文件添加到 FormData 对象
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('uploadFile_only', files[i]);
+                }
+
+                // 获取 CSRF 令牌
+                const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                const URL_FILE = "{% url 'manage:file' project_id=request.tracer.project.id %}";
+
+                // 使用 AJAX 发送文件到服务器
+                $.ajax({
+                    url: URL_FILE,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function (data) {
+                        console.log('Success:', data);
+                        alert('文件上传成功！');
+                        window.location.href = URL_FILE;
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error:', textStatus, errorThrown);
                         alert('文件上传失败！');
+                        window.location.href = URL_FILE;
                     }
                 });
             });
         });
     </script>
+
 {% endblock %}

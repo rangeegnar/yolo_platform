@@ -20,34 +20,62 @@ def file(request, project_id):
 
     # POST 请求处理
     mobile_phone = request.tracer.user.mobile_phone  # 获取用户的手机号码
-    folder_name = datetime.now().strftime("%Y%m%d%H%M%S")  # 创建文件夹名称
+    # 获取上传的文件夹
+    if request.FILES.getlist('uploadFile'):
+        # 创建文件夹名称
+        folder_name = datetime.now().strftime("%Y%m%d%H%M%S")
+        # 创建用户的文件夹路径
+        user_directory = os.path.join(settings.MEDIA_ROOT, mobile_phone, folder_name)
+        # 检查用户文件夹是否存在，如果不存在则创建
+        os.makedirs(user_directory, exist_ok=True)
 
-    # 创建用户的文件夹路径
-    user_directory = os.path.join(settings.MEDIA_ROOT, mobile_phone, folder_name)
+        files = request.FILES.getlist('uploadFile')  # 获取上传的文件
+        total_file_size = 0  # 初始化总文件大小
 
-    # 检查用户文件夹是否存在，如果不存在则创建
-    os.makedirs(user_directory, exist_ok=True)
+        for file in files:
+            fs = FileSystemStorage(location=user_directory)  # 指定存储位置为用户的子文件夹
+            fs.save(file.name, file)  # 保存文件
+            total_file_size += file.size  # 累加文件大小
 
-    # 获取上传的文件
-    files = request.FILES.getlist('uploadFile')  # 获取上传的文件
-    total_file_size = 0  # 初始化总文件大小
+        # 创建 FileInfo 实例并保存到数据库
+        file_info = FileInfo(
+            name=folder_name,  # 使用文件夹名称
+            file_size=total_file_size,  # 设置总文件大小
+            updated_by=request.tracer.user,  # 设置更新者
+            updated_at=datetime.now(),  # 使用时区感知的时间
+            file_type=1,
+            file_path=os.path.join(user_directory, folder_name).replace('\\', '/')
+        )
 
-    for file in files:
-        fs = FileSystemStorage(location=user_directory)  # 指定存储位置为用户的子文件夹
-        fs.save(file.name, file)  # 保存文件
-        total_file_size += file.size  # 累加文件大小
+        # 保存到数据库
+        file_info.save()  # 保存实例
+        return JsonResponse({'message': 'Files uploaded successfully!'}, status=200)
+    else:
+        files = request.FILES.getlist('uploadFile_only')  # 获取上传的单独文件
 
-    # 创建 FileInfo 实例并保存到数据库
-    file_info = FileInfo(
-        name=folder_name,  # 使用文件夹名称
-        file_size=total_file_size,  # 设置总文件大小
-        updated_by=request.tracer.user,  # 设置更新者
-        updated_at=datetime.now()  # 使用时区感知的时间
-    )
+        # 创建用户的文件夹路径
+        user_directory = os.path.join(settings.MEDIA_ROOT, mobile_phone)
+        # 检查用户文件夹是否存在，如果不存在则创建
+        os.makedirs(user_directory, exist_ok=True)
 
-    # 保存到数据库
-    file_info.save()  # 保存实例
-    return JsonResponse({'message': 'Files uploaded successfully!'}, status=200)
+        for file in files:
+            fs = FileSystemStorage(location=user_directory)  # 指定存储位置为用户的目录
+            fs.save(file.name, file)  # 保存文件
+
+            # 创建 FileInfo 实例并保存到数据库
+            file_info = FileInfo(
+                name=file.name,  # 使用文件名
+                file_size=file.size,  # 设置单个文件大小
+                updated_by=request.tracer.user,  # 设置更新者
+                updated_at=datetime.now(),  # 使用时区感知的时间
+                file_type=2,
+                file_path=os.path.join(user_directory, file.name).replace('\\', '/')
+            )
+
+            # 保存到数据库
+            file_info.save()  # 保存实例
+
+        return JsonResponse({'message': 'Single files uploaded successfully!'}, status=200)
 
 
 @csrf_exempt
@@ -66,3 +94,34 @@ def file_delete(request, project_id, file_id):
 
     url = reverse('manage:file', kwargs={'project_id': project_id})
     return redirect(url)
+
+@csrf_exempt
+def file_edit(request, project_id, file_id):
+    mobile_phone = request.tracer.user.mobile_phone  # 假设您能从请求中获取用户手机号码
+    file_queryset = FileInfo.objects.filter(id=file_id).first()
+    file_name = file_queryset.name
+
+    file_path = os.path.join(settings.MEDIA_ROOT, mobile_phone, file_name)
+
+    # # 检查文件是否存在并删除
+    # if os.path.exists(file_path):
+    #     # os.chmod(file_path, stat.S_IWRITE)
+    #     # os.remove(file_path)  # 删除文件
+    #     FileInfo.objects.filter(id=file_id).delete()  # 从数据库中删除记录
+
+    url = reverse('manage:file', kwargs={'project_id': project_id})
+    return redirect(url)
+
+
+def file_detail(request, project_id, file_id):
+    folder_queryset = FileInfo.objects.filter(id=file_id).first()
+    folder_name = folder_queryset.name
+    folder_directory = os.path.join(settings.MEDIA_ROOT, request.tracer.user.mobile_phone, folder_name)
+    detail_list = []
+    if os.path.exists(folder_directory):
+        for filename in os.listdir(folder_directory):
+            file_path = os.path.join(folder_directory, filename)
+            if os.path.isfile(file_path):  # 确保是文件
+                detail_list.append(filename)  # 仅存储文件名
+        return JsonResponse({'status': True, 'detail_list': detail_list})
+    return JsonResponse({'status': False, 'message': '文件夹不存在或无法访问'})

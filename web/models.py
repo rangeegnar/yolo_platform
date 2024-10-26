@@ -111,10 +111,17 @@ class Wiki(models.Model):
 
 
 class FileInfo(models.Model):
+    FILE_TYPE_CHOICES = [
+        (1, '文件夹'),
+        (2, '文件'),
+    ]
+
     name = models.CharField(verbose_name='文件名称', max_length=255)  # 文件名称
-    file_size = models.PositiveIntegerField(verbose_name='文件大小')  # 文件大小（以字节为单位）
+    file_size = models.PositiveIntegerField(verbose_name='文件大小', default=0)  # 文件大小（以字节为单位）
     updated_by = models.ForeignKey(UserInfo, on_delete=models.SET_NULL, null=True)  # 更新者
     updated_at = models.DateTimeField(verbose_name='更新时间')
+    file_type = models.IntegerField(choices=FILE_TYPE_CHOICES, verbose_name='文件种类', default=1)
+    file_path = models.CharField(verbose_name='文件路径', max_length=1000, null=True)
 
     def __str__(self):
         return self.name

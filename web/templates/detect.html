@@ -1,0 +1,104 @@
+{% extends 'layout/manage.html' %}
+
+
+{% block title %}目标检测{% endblock %}
+{% block css %}
+    <style>
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            display: none;
+        }
+
+        #file-detail-panel {
+            display: none; /* 初始隐藏 */
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <h2>目标检测系统</h2>
+
+    <!-- 激活面板的按钮 -->
+    <button id="toggle-panel" class="btn btn-primary">试试效果!</button>
+
+    <!-- 目标检测面板 -->
+    <div id="file-detail-panel">
+        <h3>目标检测</h3>
+        <form id="detection-form">
+            <div class="form-group">
+                <label for="image">上传图片:</label>
+                <input type="file" id="image" class="form-control" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label for="threshold">置信度阈值:</label>
+                <input type="number" id="threshold" class="form-control" value="0.5" step="0.01" min="0" max="1"
+                       required>
+            </div>
+            <button type="submit" class="btn btn-success">开始检测</button>
+        </form>
+
+        <div id="result">
+            <h3>检测结果</h3>
+            <ul id="result-list"></ul>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            // 切换面板显示
+            $('#toggle-panel').on('click', function () {
+                $('#file-detail-panel').toggle(); // 显示或隐藏面板
+            });
+
+            // 处理表单提交
+            $('#detection-form').on('submit', function (e) {
+                e.preventDefault(); // 阻止表单提交
+
+                var formData = new FormData();
+                var imageFile = $('#image')[0].files[0];
+                var threshold = $('#threshold').val();
+
+                formData.append('image', imageFile);
+                formData.append('threshold', threshold);
+
+                $.ajax({
+                    url: '{% url 'manage:detectry' project_id=request.tracer.project.id  %}',  // 替换为您的后端处理URL
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        $('#result-list').empty(); // 清空之前的结果
+                        if (data.status) {
+                            data.detections.forEach(function (detection) {
+                                $('#result-list').append('<li>' + detection + '</li>');
+                            });
+                        } else {
+                            $('#result-list').append('<li>' + data.message + '</li>');
+                        }
+                        $('#result').show(); // 显示结果面板
+                    },
+                    error: function (xhr) {
+                        alert('请求失败: ' + xhr.statusText);
+                    }
+                });
+            });
+        });
+
+        function closePanel() {
+            $('#file-detail-panel').hide();  // 隐藏面板
+        }
+    </script>
+
+{% endblock %}

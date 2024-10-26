@@ -1,5 +1,5 @@
 from django.urls import path, include
-from web.views import account, home, project, wiki, dashboard, issue, statistics, file, setting
+from web.views import account, home, project, wiki, dashboard, detect, statistics, file, setting
 from django.conf.urls.static import static
 from tracer import settings
 
@@ -21,12 +21,15 @@ urlpatterns = [
     path('manage/<int:project_id>/', include(([
         path('dashboard/', dashboard.dashboard, name='dashboard'),
 
-        path('issue/', issue.issue, name='issue'),
+        path('detect/detect', detect.detect, name='detect'),
+        path('detect/detectry/', detect.detect_try, name='detectry'),
 
         path('statistics/', statistics.statistics, name='statistics'),
 
         path('file/', file.file, name='file'),
         path('file/delete/<int:file_id>/', file.file_delete, name='file_delete'),
+        path('file/edit/<int:file_id>/', file.file_edit, name='file_edit'),
+        path('file/detail/<int:file_id>/', file.file_detail, name='file_detail'),
 
         # Wiki 相关的 URL
         path('wiki/', wiki.wiki, name='wiki'),
