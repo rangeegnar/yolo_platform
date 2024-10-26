@@ -1,5 +1,5 @@
 {% extends 'layout/manage.html' %}
-
+{% load project %}
 
 {% block title %}目标检测{% endblock %}
 {% block css %}
@@ -23,7 +23,9 @@
 
 
 {% block content %}
+    {% file_in_task request %}
     <h2>目标检测系统</h2>
+
 
     <!-- 激活面板的按钮 -->
     <button id="toggle-panel" class="btn btn-primary">试试效果!</button>
@@ -32,9 +34,15 @@
     <div id="file-detail-panel">
         <h3>目标检测</h3>
         <form id="detection-form">
+            {% csrf_token %}
             <div class="form-group">
-                <label for="image">上传图片:</label>
-                <input type="file" id="image" class="form-control" accept="image/*" required>
+                <label for="file-select">选择文件:</label>
+                <select id="file-select" class="form-control" required>
+                    <option value="">请选择一个文件</option>
+                    {% for file in files %}
+                        <option value="{{ file.id }}">{{ file.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
                 <label for="threshold">置信度阈值:</label>
@@ -61,23 +69,29 @@
                 $('#file-detail-panel').toggle(); // 显示或隐藏面板
             });
 
+            // AJAX 设置 CSRF token
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+                }
+            });
+
             // 处理表单提交
             $('#detection-form').on('submit', function (e) {
                 e.preventDefault(); // 阻止表单提交
 
-                var formData = new FormData();
-                var imageFile = $('#image')[0].files[0];
-                var threshold = $('#threshold').val();
+                // 获取选择的文件 ID 和阈值
+                var selectedFileId = $('#file-select').val();  // 从下拉菜单获取文件 ID
+                var threshold = $('#threshold').val();          // 获取阈值
 
-                formData.append('image', imageFile);
-                formData.append('threshold', threshold);
-
+                // 发送 AJAX 请求
                 $.ajax({
-                    url: '{% url 'manage:detectry' project_id=request.tracer.project.id  %}',  // 替换为您的后端处理URL
+                    url: '{% url "manage:detectry" project_id=request.tracer.project.id %}',  // 替换为您的后端处理URL
                     type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
+                    data: {
+                        'file_id': selectedFileId, // 选择的文件 ID
+                        'threshold': threshold       // 置信度阈值
+                    },
                     success: function (data) {
                         $('#result-list').empty(); // 清空之前的结果
                         if (data.status) {
@@ -100,5 +114,4 @@
             $('#file-detail-panel').hide();  // 隐藏面板
         }
     </script>
-
 {% endblock %}

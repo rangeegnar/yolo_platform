@@ -30,6 +30,7 @@ urlpatterns = [
         path('file/delete/<int:file_id>/', file.file_delete, name='file_delete'),
         path('file/edit/<int:file_id>/', file.file_edit, name='file_edit'),
         path('file/detail/<int:file_id>/', file.file_detail, name='file_detail'),
+        path('file/download/<int:file_id>/', file.file_download, name='file_download'),
 
         # Wiki 相关的 URL
         path('wiki/', wiki.wiki, name='wiki'),

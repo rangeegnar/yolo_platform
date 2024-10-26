@@ -29,3 +29,9 @@ def manage_menu_list(request):
             item['class'] = 'active'
 
     return {'data_list': data_list}
+
+
+@register.inclusion_tag('inclusion/file_in_task.html')
+def file_in_task(request):
+    querysets = models.FileInfo.objects.filter(updated_by=request.tracer.user.id)
+    return {'querysets': querysets, 'project_id': request.tracer.project.id}

@@ -1,0 +1,35 @@
+<div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading">文件与文件夹</div>
+
+    <!-- Table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>名称</th>
+            <th>文件大小</th>
+            <th>更新者</th>
+            <th>更新时间</th>
+        </tr>
+        </thead>
+        <tbody id="rowList">
+        <tr>
+            {% for item in querysets %}
+                <tr>
+                    <td>
+                        {% if item.file_type == 1 %}
+                            <a id="show_folder_detail"
+                               href="{% url 'manage:file_detail' project_id=project_id file_id=item.id %}">{{ item.name }}</a>
+                        {% else %}
+                            {{ item.name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ item.file_size }}</td>
+                    <td>{{ item.updated_by }}</td>
+                    <td>{{ item.updated_at }}</td>
+                </tr>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</div>

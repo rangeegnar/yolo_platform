@@ -1,6 +1,6 @@
 {% extends 'layout/manage.html' %}
 
-{% block title %}文件上传{% endblock %}
+{% block title %}文件操作{% endblock %}
 {% block css %}
     <style>
         .panel-default .panel-heading {
@@ -46,6 +46,7 @@
 
 {% block content %}
     <div class="container-fluid">
+
         <div class="panel panel-default" style="margin-top: 20px;">
             <div class="panel-heading">
                 <div>
@@ -81,7 +82,8 @@
                         <tr>
                             <td>
                                 {% if item.file_type == 1 %}
-                                    <a id="show_folder_detail" href="{% url 'manage:file_detail' project_id=request.tracer.project.id file_id=item.id %}">{{ item.name }}</a>
+                                    <a id="show_folder_detail"
+                                       href="{% url 'manage:file_detail' project_id=request.tracer.project.id file_id=item.id %}">{{ item.name }}</a>
                                 {% else %}
                                     {{ item.name }}
                                 {% endif %}
@@ -98,18 +100,53 @@
                                    href="{% url 'manage:file_delete' project_id=request.tracer.project.id file_id=item.id %}">
                                     <i class="fa fa-trash" aria-hidden="true"></i> 删除
                                 </a>
+                                <a type="button" class="btn btn-info btn-xs"
+                                   data-urlload="{% url 'manage:file_download' project_id=request.tracer.project.id file_id=item.id %}"
+                                   data-toggle="modal"
+                                   data-target="#downloadModal">
+                                    <i class="fa fa-anchor" aria-hidden="true"></i> 下载
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
                 </tr>
                 </tbody>
             </table>
+
+            {# 模态对话框 #}
+            <div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="downloadModalLabel">下载文件</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form id="download-form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="file-path">下载路径（绝对路径）:</label>
+                                    <input type="text" id="file-path" name="file_path" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button type="submit" class="btn btn-info">提交</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 {% endblock %}
 
 {% block js %}
     <script>
+        //文件的上传
         $(document).ready(function () {
             // 处理文件夹上传
             $('#uploadFolder').on('change', function (event) {
@@ -181,6 +218,45 @@
                         console.error('Error:', textStatus, errorThrown);
                         alert('文件上传失败！');
                         window.location.href = URL_FILE;
+                    }
+                });
+            });
+        });
+
+        //文件的下载
+        $(document).ready(function () {
+            // 处理模态框打开事件
+            $('#downloadModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget); // 获取触发模态框的按钮
+                var url = button.data('urlload'); // 获取 URL
+                var modal = $(this);
+
+                // 将 URL 存储到模态框中
+                modal.data('urlload', url);
+            });
+
+            // 处理下载请求
+            $('#download-form').on('submit', function (e) {
+                e.preventDefault(); // 防止表单默认提交
+
+                var modal = $('#downloadModal');
+                var filePath = $('#file-path').val(); // 获取用户输入的文件路径
+                var url = modal.data('urlload'); // 获取存储的 URL
+
+                // 发送 AJAX 请求
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        'file_path': filePath,
+                        'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val() // 添加 CSRF 令牌
+                    },
+                    success: function (data) {
+                        modal.modal('hide'); // 关闭模态框
+                        alert('下载请求已成功发送！'); // 可选提示
+                    },
+                    error: function (xhr) {
+                        alert('下载失败: ' + xhr.statusText);
                     }
                 });
             });
