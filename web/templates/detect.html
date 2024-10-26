@@ -11,24 +11,26 @@
             display: none;
         }
 
-        #file-detail-panel {
-            display: none; /* 初始隐藏 */
+        #file-detail-panel, #training-panel {
             border: 1px solid #ccc;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
         }
+
+        #training-panel {
+            display: none; /* 初始隐藏 */
+        }
     </style>
 {% endblock %}
-
 
 {% block content %}
     {% file_in_task request %}
     <h2>目标检测系统</h2>
 
-
     <!-- 激活面板的按钮 -->
     <button id="toggle-panel" class="btn btn-primary">试试效果!</button>
+    <button id="start-training" class="btn btn-secondary">开始训练</button>
 
     <!-- 目标检测面板 -->
     <div id="file-detail-panel">
@@ -58,15 +60,28 @@
         </div>
     </div>
 
-{% endblock %}
+    <!-- 开始训练面板 -->
+    <div id="training-panel">
+        <h3>训练模块</h3>
+        <p>此处可以添加训练相关的内容或功能。</p>
+        <button id="start-training-submit" class="btn btn-success">开始训练</button>
+    </div>
 
+{% endblock %}
 
 {% block js %}
     <script>
         $(document).ready(function () {
             // 切换面板显示
             $('#toggle-panel').on('click', function () {
-                $('#file-detail-panel').toggle(); // 显示或隐藏面板
+                $('#file-detail-panel').toggle(); // 显示或隐藏目标检测面板
+                $('#training-panel').hide(); // 确保训练面板隐藏
+            });
+
+            // 切换到训练面板
+            $('#start-training').on('click', function () {
+                $('#file-detail-panel').hide(); // 隐藏目标检测面板
+                $('#training-panel').show(); // 显示训练面板
             });
 
             // AJAX 设置 CSRF token
@@ -76,7 +91,7 @@
                 }
             });
 
-            // 处理表单提交
+            // 处理目标检测表单提交
             $('#detection-form').on('submit', function (e) {
                 e.preventDefault(); // 阻止表单提交
 
@@ -107,6 +122,12 @@
                         alert('请求失败: ' + xhr.statusText);
                     }
                 });
+            });
+
+            // 处理开始训练的点击事件
+            $('#start-training-submit').on('click', function () {
+                // 这里可以添加 AJAX 请求或其他逻辑来开始训练
+                alert('开始训练的逻辑尚未实现。');
             });
         });
 

@@ -95,11 +95,10 @@ def file_delete(request, project_id, file_id):
     if os.path.exists(file_path):
         if file_type == 2:
             os.remove(file_path)  # 删除文件
-            FileInfo.objects.filter(id=file_id).delete()  # 从数据库中删除记录
         else:
             shutil.rmtree(file_path)  # 删除文件夹及其内容
-            FileInfo.objects.filter(id=file_id).delete()  # 从数据库中删除记录
-
+    # 从数据库中删除记录
+    FileInfo.objects.filter(id=file_id).delete()
     url = reverse('manage:file', kwargs={'project_id': project_id})
     return redirect(url)
 
