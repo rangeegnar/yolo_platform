@@ -26,7 +26,7 @@
 
 {% block content %}
     {% file_in_task request %}
-    <h2>目标检测系统</h2>
+    <h2>YOLO目标检测系统</h2>
 
     <!-- 激活面板的按钮 -->
     <button id="toggle-panel" class="btn btn-primary">试试效果!</button>
@@ -174,7 +174,7 @@
                             if (mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.ogg')) {
                                 // 视频文件
                                 mediaElement = '<div class="col-md-5">' +  // 设置栅格值为6
-                                    '<video controls style="width: 100%; height: auto;"><source src="' + mediaUrl + '" type="video/' + fileType + '">您的浏览器不支持视频播放。</video>' +
+                                    '<video controls style="width: 100%; height: auto;"><source src="' + mediaUrl + '" type="video/mp4">您的浏览器不支持视频播放。</video>' +
                                     '</div>';
                             } else if (mediaUrl.endsWith('.jpg') || mediaUrl.endsWith('.jpeg') || mediaUrl.endsWith('.png') || mediaUrl.endsWith('.gif')) {
                                 // 图片文件

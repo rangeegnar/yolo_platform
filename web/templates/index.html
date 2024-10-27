@@ -2,10 +2,21 @@
 {% load static %}
 
 {% block title %}首页{% endblock %}
-{% block css %}{% endblock %}
+{% block css %}
+<style>
+    .video-container {
+        margin-top: -20px; /* 使视频与上方元素间隔为 -20 像素 */
+        text-align: left; /* 左对齐 */
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-
+    <div class="video-container">
+        <video src="{{ index_video_url }}" width="1580" height="850" autoplay loop muted>
+            您的浏览器不支持视频标签。
+        </video>
+    </div>
 {% endblock %}
 
 {% block js %}{% endblock %}
