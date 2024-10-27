@@ -23,7 +23,7 @@ def file(request, project_id):
     # POST 请求处理
     mobile_phone = request.tracer.user.mobile_phone  # 获取用户的手机号码
     # 获取上传的文件夹
-    if request.FILES.getlist('uploadFile'):
+    if request.FILES.getlist('uploadFile'):  # 处理文件夹
         # 创建文件夹名称
         folder_name = datetime.now().strftime("%Y%m%d%H%M%S")
         # 创建用户的文件夹路径
@@ -34,10 +34,11 @@ def file(request, project_id):
         files = request.FILES.getlist('uploadFile')  # 获取上传的文件
         total_file_size = 0  # 初始化总文件大小
 
+        # 累加文件大小
         for file in files:
             fs = FileSystemStorage(location=user_directory)  # 指定存储位置为用户的子文件夹
             fs.save(file.name, file)  # 保存文件
-            total_file_size += file.size  # 累加文件大小
+            total_file_size += file.size
 
         # 创建 FileInfo 实例并保存到数据库
         file_info = FileInfo(
@@ -74,7 +75,8 @@ def file(request, project_id):
                 updated_by=request.tracer.user,  # 设置更新者
                 updated_at=datetime.now(),  # 使用时区感知的时间
                 file_type=2,
-                file_path=unique_file_path.replace('\\', '/')  # 保存新文件的路径
+                file_path=unique_file_path.replace('\\', '/'),
+                media_url=f"{settings.MEDIA_URL}{mobile_phone}/{unique_file_name}",
             )
 
             # 保存到数据库

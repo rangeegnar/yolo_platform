@@ -42,21 +42,40 @@
                 <select id="file-select" class="form-control" required>
                     <option value="">请选择一个文件</option>
                     {% for file in files %}
-                        <option value="{{ file.id }}">{{ file.name }}</option>
+                        <option value="{{ file.id }}"
+                                data-url="{{ file.media_url }}"
+                                data-type="{{ file.file_type }}">
+                            {{ file.name }}</option>
                     {% endfor %}
                 </select>
             </div>
+
+            <div class="form-group">
+                <label for="pretrain">训练模型</label>
+                <select id="pretrain-select" class="form-control" required>
+                    <option value="">请选择模型</option>
+                    {% for pretrain in pretrains %}
+                        <option value="{{ pretrain.name }}">{{ pretrain.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="form-group">
                 <label for="threshold">置信度阈值:</label>
                 <input type="number" id="threshold" class="form-control" value="0.5" step="0.01" min="0" max="1"
                        required>
             </div>
-            <button type="submit" class="btn btn-success">开始检测</button>
+            <button type="submit" class="btn btn-success" id="start-detect">开始检测</button>
         </form>
 
         <div id="result">
             <h3>检测结果</h3>
-            <ul id="result-list"></ul>
+            <div class="row" id="media-display">
+                <!-- 用于显示图片或视频的区域 -->
+            </div>
+            <div class="row" id="detection-output">
+                <!-- 用于显示图片或视频的区域 -->
+            </div>
         </div>
     </div>
 
@@ -71,11 +90,45 @@
 
 {% block js %}
     <script>
+
+
         $(document).ready(function () {
             // 切换面板显示
             $('#toggle-panel').on('click', function () {
                 $('#file-detail-panel').toggle(); // 显示或隐藏目标检测面板
                 $('#training-panel').hide(); // 确保训练面板隐藏
+            });
+
+            // 处理选择文件后，显示预览
+            $('#file-select').on('change', function () {
+                var selectedFile = $('#file-select option:selected');
+                var fileUrl = selectedFile.data('url');  // 获取 data-url 属性
+
+                // 从 fileUrl 提取文件后缀名
+                var fileType = fileUrl.split('.').pop().toLowerCase(); // 获取后缀名并转换为小写
+
+                console.log("File URL: ", fileUrl);
+                console.log("File Type: ", fileType);
+
+                // 清空之前的媒体显示区域
+                $('#media-display').empty();
+
+                // 根据文件类型显示图片或视频
+                if (fileType.startsWith('jpg') || fileType.startsWith('jpeg') || fileType.startsWith('png') || fileType.startsWith('gif')) {
+                    $('#media-display').append(
+                        '<div class="col-md-5">' +  // 设置栅格值为6
+                        '<img src="' + fileUrl + '" alt="Uploaded Image" style="width: 100%; height: auto;">' + // 使用宽度100%
+                        '</div>'
+                    );
+                } else if (fileType.startsWith('mp4') || fileType.startsWith('webm') || fileType.startsWith('ogg')) {
+                    $('#media-display').append(
+                        '<div class="col-md-5">' +  // 设置栅格值为6
+                        '<video controls style="width: 100%; height: auto;"><source src="' + fileUrl + '" type="video/' + fileType + '">您的浏览器不支持视频播放。</video>' +
+                        '</div>'
+                    );
+                } else {
+                    $('#media-display').append('<p>不支持的文件类型。</p>');
+                }
             });
 
             // 切换到训练面板
@@ -93,11 +146,14 @@
 
             // 处理目标检测表单提交
             $('#detection-form').on('submit', function (e) {
+                $('#result').show(); // 显示结果面板
+
                 e.preventDefault(); // 阻止表单提交
 
                 // 获取选择的文件 ID 和阈值
                 var selectedFileId = $('#file-select').val();  // 从下拉菜单获取文件 ID
                 var threshold = $('#threshold').val();          // 获取阈值
+                var pretrain = $('#pretrain-select').val();
 
                 // 发送 AJAX 请求
                 $.ajax({
@@ -105,22 +161,39 @@
                     type: 'POST',
                     data: {
                         'file_id': selectedFileId, // 选择的文件 ID
-                        'threshold': threshold       // 置信度阈值
+                        'threshold': threshold,      // 置信度阈值
+                        'pretrain': pretrain,
                     },
                     success: function (data) {
-                        $('#result-list').empty(); // 清空之前的结果
                         if (data.status) {
-                            data.detections.forEach(function (detection) {
-                                $('#result-list').append('<li>' + detection + '</li>');
-                            });
+                            var mediaUrl = data.data; // 获取返回的媒体 URL
+                            var mediaElement;
+                            var mediaName = data.where
+
+                            // 根据文件类型选择合适的 HTML 元素
+                            if (mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.ogg')) {
+                                // 视频文件
+                                mediaElement = '<div class="col-md-5">' +  // 设置栅格值为6
+                                    '<video controls style="width: 100%; height: auto;"><source src="' + mediaUrl + '" type="video/' + fileType + '">您的浏览器不支持视频播放。</video>' +
+                                    '</div>';
+                            } else if (mediaUrl.endsWith('.jpg') || mediaUrl.endsWith('.jpeg') || mediaUrl.endsWith('.png') || mediaUrl.endsWith('.gif')) {
+                                // 图片文件
+                                mediaElement = '<div class="col-md-5">' +  // 设置栅格值为6
+                                    '<img src="' + mediaUrl + '" alt="Uploaded Image" style="width: 100%; height: auto;">' + // 使用宽度100%
+                                    '</div>';
+                            } else {
+                                $('#result-list').append('<li>不支持的文件类型</li>');
+                            }
+
+                            // 将媒体元素添加到页面
+                            $('#media-display').append(mediaElement);
+
+                            $('#detection-output').append('<h4 class="detection-message">检测成功！刷新可查看文件，保存到' + mediaName + '</h4>');
+
                         } else {
-                            $('#result-list').append('<li>' + data.message + '</li>');
+                            alert('请求失败: ' + xhr.statusText);
                         }
-                        $('#result').show(); // 显示结果面板
                     },
-                    error: function (xhr) {
-                        alert('请求失败: ' + xhr.statusText);
-                    }
                 });
             });
 
@@ -134,5 +207,10 @@
         function closePanel() {
             $('#file-detail-panel').hide();  // 隐藏面板
         }
+
+        // 点击新的界面时隐藏检测结果信息
+        $('#start-detect').on('click', function () {
+            $('#detection-output .detection-message').hide(); // 隐藏检测结果信息
+        });
     </script>
 {% endblock %}

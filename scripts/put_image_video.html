@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传并展示图片</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #007bff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>上传并展示图片</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <img id="imagePreview" alt="预览图片" style="display:none;">
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+
+        fileInput.addEventListener('change', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // 显示图片
+                }
+                reader.readAsDataURL(file); // 读取文件为 Data URL
+            }
+        });
+    </script>
+</body>
+</html>

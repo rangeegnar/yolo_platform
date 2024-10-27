@@ -1,9 +1,13 @@
 import cv2
 from ultralytics import YOLO
+from tracer import settings
 
-def detect_try_(input_path, confidence_threshold, output_path):
+
+def detect_try_(input_path, confidence_threshold, output_path, pretrain):
     # 1. 加载 YOLO 模型
-    model = YOLO("D:/python_all/tracer-53e05801b2f2e12436b14246a1d0ebda604cd921/web/ultralytics_main/A_demo/yolov8n.pt")
+    model_protrain = settings.PRETRAINED_MODELS_ROOT + '\\' + pretrain
+    print(model_protrain)
+    model = YOLO(model_protrain)
 
     # 2. 检测输入是图像还是视频
     if input_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
@@ -65,8 +69,6 @@ def detect_try_(input_path, confidence_threshold, output_path):
         raise ValueError("Unsupported file format. Please provide an image or video file.")
 
 # 示例调用
-
-
 if __name__ == '__main__':
     image = detect_try_(r'D:\python_all\tracer-53e05801b2f2e12436b14246a1d0ebda604cd921\media\19546051318\1 (2).jpg',
                         0.5,

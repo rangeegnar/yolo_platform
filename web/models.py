@@ -1,5 +1,7 @@
 from django.db import models
-
+import os
+import datetime
+from tracer import settings
 
 # Create your models here.
 class UserInfo(models.Model):
@@ -110,6 +112,8 @@ class Wiki(models.Model):
         return self.title
 
 
+
+
 class FileInfo(models.Model):
     FILE_TYPE_CHOICES = [
         (1, '文件夹'),
@@ -122,6 +126,14 @@ class FileInfo(models.Model):
     updated_at = models.DateTimeField(verbose_name='更新时间')
     file_type = models.IntegerField(choices=FILE_TYPE_CHOICES, verbose_name='文件种类', default=1)
     file_path = models.CharField(verbose_name='文件路径', max_length=1000, null=True)
+    media_url = models.URLField(verbose_name='媒体 URL', max_length=1000, null=True)  # 媒体 URL
+
+    def __str__(self):
+        return self.name
+
+
+class Pretrain_model(models.Model):
+    name = models.CharField(verbose_name='预训练文件名称', max_length=255)  #
 
     def __str__(self):
         return self.name

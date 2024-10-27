@@ -41,4 +41,7 @@ urlpatterns = [
 
         path('settings/', setting.settings, name='settings'),
     ], 'manage'), namespace='manage')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # 添加媒体文件支持
+]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # 添加媒体文件支持
+urlpatterns += static(settings.PRETRAINED_MODELS_URL, document_root=settings.PRETRAINED_MODELS_ROOT)

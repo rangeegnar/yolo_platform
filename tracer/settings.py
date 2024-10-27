@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -27,20 +26,21 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'web.apps.WebConfig'
+    'web.apps.WebConfig',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,11 +48,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'web.middlewares.auth.AuthMiddleware'
+    'web.middlewares.auth.AuthMiddleware',
 ]
+CORS_ALLOW_ALL_ORIGINS = True  # 允许所有域名访问
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 ROOT_URLCONF = 'tracer.urls'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -60,6 +60,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 媒体文件的设置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 上传文件存放的目录
+
+PRETRAINED_MODELS_URL = '/web/ultralytics_main/all_pretrain_model'  # 访问路径
+PRETRAINED_MODELS_ROOT = os.path.join(BASE_DIR, r'web\ultralytics_main\all_pretrain_model')  # 存放预训练模型的目录
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 
@@ -82,7 +85,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tracer.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -92,7 +94,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -112,7 +113,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -126,16 +126,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
 
-
 # 阿里云短信 sms
-ALIYUN_ACCESS_KEY_ID = '牛逼'
-ALIYUN_ACCESS_KEY_SECRET = '666'
+ALIYUN_ACCESS_KEY_ID = '666666666'
+ALIYUN_ACCESS_KEY_SECRET = '66666666'
 ALIYUN_SMS_SIGN = '我的玉米bug管理平台'
 
 ALIYUN_SMS_TEMPLATE = {
@@ -152,11 +150,7 @@ WHITE_REGEX_URL_LIST = [
     "/lgout/",
 ]
 
-
-
-
 try:
     from .local_settings import *
 except ImportError:
     pass
-

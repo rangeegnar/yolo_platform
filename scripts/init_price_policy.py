@@ -1,6 +1,14 @@
-import base
-from web import models
+import os
+import django
 
+# 设置设置模块
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tracer.settings')
+
+# 初始化 Django
+django.setup()
+
+
+from web import models
 
 def run():
     exists = models.PricePolicy.objects.filter(category=1, )
