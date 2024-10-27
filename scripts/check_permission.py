@@ -1,5 +1,8 @@
 import os
 
+
+
+
 # 假设 source_file_path 和 to_file_path 已经定义
 source_file_path = r"D:\python_all\tracer-53e05801b2f2e12436b14246a1d0ebda604cd921\media\19546051318\1 (2).txt"  # 源文件路径
 to_file_path = r"C:\Users\24666\Desktop\1\file.txt"  # 目标文件路径

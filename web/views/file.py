@@ -1,17 +1,20 @@
 import os
+import shutil
+import zipfile
+import random
+from datetime import datetime
+
 from web.models import FileInfo
+
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-from datetime import datetime
 from django.urls import reverse
-import shutil
-import zipfile
+
 from utils.avoid_same_name import get_unique_file_name
-from django.shortcuts import get_object_or_404
-from web.forms.file import FileModelForm  # 导入表单类
+from utils.video_encoding import reencode_video
 
 
 @csrf_exempt
@@ -64,9 +67,16 @@ def file(request, project_id):
         for file in files:
             # 确保文件名唯一
             unique_file_name, unique_file_path = get_unique_file_name(user_directory, file.name)
+            # 获取拓展
+            extension = unique_file_name.split('.')[-1].lower()
+
+            if extension in ['mp4', 'avi', 'mov', 'mkv', 'wmv']:
+                temp_image_video_path = os.path.join(user_directory, f"{random.randint(0, 10000)}.mp4")
+                reencode_video(unique_file_path, temp_image_video_path)
 
             fs = FileSystemStorage(location=user_directory)  # 指定存储位置为用户的目录
             fs.save(unique_file_name, file)  # 保存文件
+
 
             # 创建 FileInfo 实例并保存到数据库
             file_info = FileInfo(

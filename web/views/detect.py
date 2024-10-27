@@ -1,4 +1,5 @@
 import os
+import random
 from tracer import settings
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -6,7 +7,7 @@ from web.ultralytics_main.A_demo.detect_try_user import detect_try_
 from django.http import JsonResponse
 from web.models import FileInfo, Pretrain_model
 from datetime import datetime
-from utils.avoid_same_name import detect_get_unique_file_name
+from utils import avoid_same_name, video_encoding
 
 
 def detect(request, project_id):
@@ -34,11 +35,16 @@ def detect_try(request, project_id):
             threshold = float(threshold)
 
             file_name, file_extension = os.path.splitext(file_object.name)
-            new_image_video_name, new_image_video_path = detect_get_unique_file_name(user_directory, file_name,
+            new_image_video_name, new_image_video_path = avoid_same_name.detect_get_unique_file_name(user_directory, file_name,
                                                                                      file_extension)
             new_image_video_path = new_image_video_path.replace('\\', '/')
 
             detect_try_(image_video_path, threshold, new_image_video_path, pretrain)
+
+            if file_extension in ['mp4', 'avi', 'mov', 'mkv', 'wmv']:
+                temp_image_video_path = os.path.join(user_directory, f"{random.randint(0, 10000)}.mp4")
+                print(temp_image_video_path)
+                video_encoding.reencode_video(new_image_video_path, temp_image_video_path)
 
             file_info = FileInfo(
                 name=new_image_video_name,

@@ -123,7 +123,7 @@
                 } else if (fileType.startsWith('mp4') || fileType.startsWith('webm') || fileType.startsWith('ogg')) {
                     $('#media-display').append(
                         '<div class="col-md-5">' +  // 设置栅格值为6
-                        '<video controls style="width: 100%; height: auto;"><source src="' + fileUrl + '" type="video/' + fileType + '">您的浏览器不支持视频播放。</video>' +
+                        '<video autoplay loop style="width: 100%; height: auto;"><source src="' + fileUrl + '" type="video/' + fileType + '">您的浏览器不支持视频播放。</video>' +
                         '</div>'
                     );
                 } else {
@@ -174,7 +174,7 @@
                             if (mediaUrl.endsWith('.mp4') || mediaUrl.endsWith('.webm') || mediaUrl.endsWith('.ogg')) {
                                 // 视频文件
                                 mediaElement = '<div class="col-md-5">' +  // 设置栅格值为6
-                                    '<video controls style="width: 100%; height: auto;"><source src="' + mediaUrl + '" type="video/mp4">您的浏览器不支持视频播放。</video>' +
+                                    '<video autoplay loop style="width: 100%; height: auto;"><source src="' + mediaUrl + '" type="video/mp4">您的浏览器不支持视频播放。</video>' +
                                     '</div>';
                             } else if (mediaUrl.endsWith('.jpg') || mediaUrl.endsWith('.jpeg') || mediaUrl.endsWith('.png') || mediaUrl.endsWith('.gif')) {
                                 // 图片文件
